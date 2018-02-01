@@ -2,15 +2,36 @@ import XCTest
 @testable import RequestManager
 
 class RequestManagerTests: XCTestCase {
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(RequestManager().text, "Hello, World!")
+    func testAuthorizationHeaderSetFromManager() {
+        let request = Request(url: "derp.derp")
+        let manager =  RequestManager()
+        let token = "token"
+        manager.authorizationToken = token
+
+        let mutableRequest = manager.mutableRequest(for: request)
+        let authorizationHeader = mutableRequest.allHTTPHeaderFields?["Authorization"]
+
+        XCTAssertNotNil(authorizationHeader)
+        XCTAssertTrue(authorizationHeader == "Token \(token)")
     }
 
+    func testAuthorizationHeaderInRequestTakesPrecidence() {
+        var request = Request(url: "derp.derp")
+        let header = "custom auth header. #winning"
+        request.authorizationHeader = header
+
+        let manager =  RequestManager()
+        manager.authorizationToken = "token"
+
+        let mutableRequest = manager.mutableRequest(for: request)
+        let authorizationHeader = mutableRequest.allHTTPHeaderFields?["Authorization"]
+
+        XCTAssertNotNil(authorizationHeader)
+        XCTAssertTrue(authorizationHeader == header)
+    }
 
     static var allTests = [
-        ("testExample", testExample),
+        ("testAuthorizationHeaderSetFromManager", testAuthorizationHeaderSetFromManager),
+        ("testAuthorizationHeaderInRequestTakesPrecidence", testAuthorizationHeaderInRequestTakesPrecidence),
     ]
 }

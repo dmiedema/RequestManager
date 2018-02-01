@@ -80,6 +80,7 @@ public struct Request {
     public let parameters: Parameters?
     public let requestEncoding: RequestEncoding
     public let responseEncoding: ResponseEncoding
+    public var authorizationHeader: String?
 
     public init(method: HTTPMethod = .get, url: String, parameters: Parameters? = nil,
                 requestEncoding: RequestEncoding = .json, responseEncoding: ResponseEncoding = .json) {
@@ -106,6 +107,9 @@ public struct Request {
 
         if !parametersInURL {
             request.httpBody = requestEncoding.encode(parameters)
+        }
+        if let authorizationHeader = authorizationHeader {
+            request.addValue(authorizationHeader, forHTTPHeaderField: "Authorization")  
         }
 
         return request

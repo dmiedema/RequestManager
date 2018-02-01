@@ -50,15 +50,23 @@ extension RequestManager {
         return nil
     }
 
+    internal func mutableRequest(for request: Request) -> NSMutableURLRequest {
+        let urlRequest = request.urlRequest
+
+        // Use our token only if the request has not set its own 'Authorization' header
+        if request.authorizationHeader == nil,
+            let token = authorizationToken {
+            urlRequest.addValue("Token \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        return urlRequest
+    }
+
     /// Send a `Request` via our `RequestManager`
     /// - parameter request: Request to send
     /// - parameter completion:
     public func send(_ request: Request, completion: @escaping (RequestResult<Any, Error>) -> Void) {
-        let urlRequest = request.urlRequest
-
-        if let token = authorizationToken {
-            urlRequest.addValue("Token \(token)", forHTTPHeaderField: "Authorization")
-        }
+        let urlRequest = mutableRequest(for: request)
 
         let task = session.dataTask(with: urlRequest as URLRequest) { (data, response, error) in
             guard let completedTask = self.tasks.filter({
