@@ -8,6 +8,11 @@
 
 import Foundation
 
+public enum NetworkResult<T, Error> {
+    case success(T)
+    case failure(Error)
+}
+
 public class RequestManager {
     public var authorizationToken: String? = nil
     public init() {}
@@ -48,7 +53,7 @@ extension RequestManager {
     /// Send a `Request` via our `RequestManager`
     /// - parameter request: Request to send
     /// - parameter completion:
-    public func send(_ request: Request, completion: @escaping (_ responseObject: Any?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) {
+    public func send(_ request: Request, completion: @escaping (NetworkResult<Any, Error>) -> Void) {
         let urlRequest = request.urlRequest
 
         if let token = authorizationToken {
@@ -74,7 +79,11 @@ extension RequestManager {
             }
 
             let responseError = self.errorFor(data, response: response, error: error)
-            completion(responseObject, response as? HTTPURLResponse, error ?? jsonError ?? responseError)
+            if let responseObject = responseObject {
+                completion(.success(responseObject))
+            } else {
+                completion(.failure((error ?? jsonError ?? responseError)!))
+            }
             self.completeTask(completedTask)
         }
         addTask(task)
