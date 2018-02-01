@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum NetworkResult<T, Error> {
+public enum RequestResult<T, Error> {
     case success(T)
     case failure(Error)
 }
@@ -53,7 +53,7 @@ extension RequestManager {
     /// Send a `Request` via our `RequestManager`
     /// - parameter request: Request to send
     /// - parameter completion:
-    public func send(_ request: Request, completion: @escaping (NetworkResult<Any, Error>) -> Void) {
+    public func send(_ request: Request, completion: @escaping (RequestResult<Any, Error>) -> Void) {
         let urlRequest = request.urlRequest
 
         if let token = authorizationToken {
