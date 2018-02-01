@@ -74,9 +74,7 @@ extension RequestManager {
             }
 
             let responseError = self.errorFor(data, response: response, error: error)
-            DispatchQueue.main.async {
-                completion(responseObject, response as? HTTPURLResponse, error ?? jsonError ?? responseError)
-            }
+            completion(responseObject, response as? HTTPURLResponse, error ?? jsonError ?? responseError)
             self.completeTask(completedTask)
         }
         addTask(task)
