@@ -75,6 +75,10 @@ extension RequestManager {
                 return
                 // fatalError("Unable to find task matching response: \(String(describing: response))")
             }
+            if let response = response, !response.hasSuccessStatus {
+                completion(.failure(error ?? RequestErrorCode.requestFailed.error))
+                return
+            }
 
             var responseObject: Any?
             var jsonError: Error?
