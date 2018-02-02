@@ -20,6 +20,9 @@ public enum HTTPMethod: String {
 public enum RequestEncoding: String {
     case json   = "application/json"
     case url    = "application/x-www-form-urlencoded; charset=utf-8"
+    var header: String {
+        return "Content-Type"
+    }
     func encode(_ parameters: Parameters?) -> Data? {
         guard let parameters = parameters else {
             return nil }
@@ -42,6 +45,9 @@ public enum ResponseEncoding: String {
     case image  = "image/*"
     case jpg    = "image/jpg"
     case png    = "image/png"
+    var header: String {
+        return "Accept"
+    }
 }
 
 public protocol StringEncodable {
@@ -111,6 +117,8 @@ public struct Request {
         if let authorizationHeader = authorizationHeader {
             request.addValue(authorizationHeader, forHTTPHeaderField: "Authorization")  
         }
+        request.addValue(requestEncoding.rawValue, forHTTPHeaderField: requestEncoding.header)
+        request.addValue(responseEncoding.rawValue, forHTTPHeaderField: responseEncoding.header)
 
         return request
     }
