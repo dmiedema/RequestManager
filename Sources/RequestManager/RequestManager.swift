@@ -27,7 +27,6 @@ public class RequestManager {
         tasks = tasks.filter({$0 != task})
     }
 
-
     lazy var session: URLSession = {
         let configuration = URLSessionConfiguration.default
         return URLSession(configuration: configuration)
@@ -47,7 +46,8 @@ extension RequestManager {
             let err = RequestErrorCode.requestFailed.error
             return err
         }
-        return nil
+
+        return error
     }
 
     internal func mutableRequest(for request: Request) -> NSMutableURLRequest {
@@ -103,7 +103,7 @@ extension RequestManager {
     }
 }
 
-private extension URLResponse {
+internal extension URLResponse {
     var isJSON: Bool {
         guard let response = self as? HTTPURLResponse else {
             return false }

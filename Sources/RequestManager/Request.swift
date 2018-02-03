@@ -20,8 +20,8 @@ public enum HTTPMethod: String {
 public enum RequestEncoding: String {
     case json   = "application/json"
     case url    = "application/x-www-form-urlencoded; charset=utf-8"
-    var header: String {
-        return "Content-Type"
+    var header: RequestHeader {
+        return .contentType
     }
     func encode(_ parameters: Parameters?) -> Data? {
         guard let parameters = parameters else {
@@ -45,8 +45,36 @@ public enum ResponseEncoding: String {
     case image  = "image/*"
     case jpg    = "image/jpg"
     case png    = "image/png"
-    var header: String {
-        return "Accept"
+    var header: RequestHeader {
+        return .accept
+    }
+}
+
+public enum RequestHeader: String {
+    case authorization = "Authorization"
+    case contentType = "Content-Type"
+    case accept = "Accept"
+}
+
+extension NSMutableURLRequest {
+    func addValue(_ value: String, forHeader header: RequestHeader) {
+        self.addValue(value, forHTTPHeaderField: header.rawValue)
+    }
+
+    func set(responseEncoding encoding: ResponseEncoding) {
+        self.addValue(encoding.rawValue, forHeader: .accept)
+    }
+
+    func set(requestEncoding encoding: RequestEncoding) {
+        self.addValue(encoding.rawValue, forHeader: .contentType)
+    }
+
+    func set(authorizationHeader header: String) {
+        self.addValue(header, forHeader: .authorization)
+    }
+
+    func value(forHeader header: RequestHeader) -> String? {
+        return self.value(forHTTPHeaderField: header.rawValue)
     }
 }
 
@@ -115,10 +143,11 @@ public struct Request {
             request.httpBody = requestEncoding.encode(parameters)
         }
         if let authorizationHeader = authorizationHeader {
-            request.addValue(authorizationHeader, forHTTPHeaderField: "Authorization")  
+            request.set(authorizationHeader: authorizationHeader)
         }
-        request.addValue(requestEncoding.rawValue, forHTTPHeaderField: requestEncoding.header)
-        request.addValue(responseEncoding.rawValue, forHTTPHeaderField: responseEncoding.header)
+        
+        request.set(requestEncoding: requestEncoding)
+        request.set(responseEncoding: responseEncoding)
 
         return request
     }
