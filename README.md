@@ -17,7 +17,7 @@ RequestManager().send(request, completion: { (result) in
 })
 ```
 
-Originally this was developed for my internal use, and then modified for [`AsyncKit`]().
+Originally this was developed for my internal use, and then modified for [`AsyncKit`](https://github.com/yannickl/AwaitKit).
 If you have some ideas on how to make it better, I'm definitely open to improvements.
 
 So how do you use it with AsyncKit?
@@ -25,18 +25,18 @@ I've used it this way
 
 ``` swift
 func doThingWith(otherThing: OtherThing) -> Promise<Bool> {
-    return Promise { (resolve, reject) in
-        let url = "https://bender.is.great/api/do/things/\(otherThing.id)"
-        var request = Request(method: .delete, url: url)
-        manager.send(request, completion: { (result) in
-            switch result {
-            case .failure(let error):
-                reject(error)
-            case .success(_):
-                resolve(true)
-            }
-        })
-    }
+  return Promise { (resolve, reject) in
+    let url = "https://bender.is.great/api/do/things/\(otherThing.id)"
+    var request = Request(method: .delete, url: url)
+    manager.send(request, completion: { (result) in
+      switch result {
+      case .failure(let error):
+        reject(error)
+      case .success(_):
+        resolve(true)
+      }
+    })
+  }
 }
 ```
 
