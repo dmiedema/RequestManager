@@ -72,34 +72,38 @@ extension RequestManager {
             guard let completedTask = self.tasks.filter({
                 $0.originalRequest?.url?.absoluteString == response?.url?.absoluteString
             }).first else {
-                return
-                // fatalError("Unable to find task matching response: \(String(describing: response))")
-            }
-            if let response = response, !response.hasSuccessStatus {
-                completion(.failure(error ?? RequestErrorCode.requestFailed.error))
-                return
-            }
-
-            var responseObject: Any?
-            var jsonError: Error?
-            if let data = data, response?.isJSON == true {
-                do {
-                    responseObject = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableContainers])
-                } catch {
-                    jsonError = error
-                }
-            }
-
-            let responseError = self.errorFor(data, response: response, error: error)
-            if let responseObject = responseObject {
-                completion(.success(responseObject))
-            } else {
-                completion(.failure((error ?? jsonError ?? responseError)!))
-            }
+                fatalError("Unable to find task matching response: \(String(describing: response))") }
+            completion(self.processResponse(data: data, response: response, error: error))
             self.completeTask(completedTask)
         }
         addTask(task)
         task.resume()
+    }
+
+    func processResponse(data: Data?, response: URLResponse?, error: Error?) -> RequestResult<Any, Error> {
+        if let response = response, !response.hasSuccessStatus {
+            return .failure(error ?? RequestErrorCode.requestFailed.error)
+        }
+
+        var responseObject: Any?
+        var jsonError: Error?
+        if let data = data, response?.isJSON == true {
+            do {
+                responseObject = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableContainers])
+            } catch {
+                jsonError = error
+            }
+        }
+
+        let responseError = self.errorFor(data, response: response, error: error)
+        if let responseObject = responseObject {
+            return .success(responseObject)
+        } else if let response = response,
+            response.hasSuccessStatus {
+            return .success(Data()) // send an empty data object to fullfil `success` requirement
+        } else {
+            return .failure((error ?? jsonError ?? responseError)!)
+        }
     }
 }
 

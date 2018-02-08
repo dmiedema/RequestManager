@@ -72,12 +72,22 @@ class RequestManagerTests: XCTestCase {
         XCTAssertFalse(nonHTTPURLResponse.hasSuccessStatus)
     }
 
+    func testEmptyEverythingIsSuccess() {
+        let deleteURLResponse = HTTPURLResponse(url: URL(string: "derpderp")!, statusCode: 204, httpVersion: "1.1", headerFields: nil)! as URLResponse
+        let result = RequestManager().processResponse(data: nil, response: deleteURLResponse, error: nil)
+        switch result {
+        case .success(_): break
+        case .failure(_): XCTFail("Should have no failed")
+        }
+    }
+
     static var allTests = [
         ("testAuthorizationHeaderSetFromManager", testAuthorizationHeaderSetFromManager),
         ("testAuthorizationHeaderInRequestTakesPrecidence", testAuthorizationHeaderInRequestTakesPrecidence),
         ("testTaskMethods", testTaskMethods),
         ("testIsJSON", testIsJSON),
         ("testSuccessStatus", testSuccessStatus),
+        ("testEmptyEverythingIsSuccess", testEmptyEverythingIsSuccess),
     ]
 }
 
